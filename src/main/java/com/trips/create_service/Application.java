@@ -15,7 +15,7 @@ public class Application {
                 Generate.builder().data(Parser.parse(args).getData()).build().execute();
                 break;
             case HYDRATE:
-                Hydrate.execute();
+                Hydrate.builder().build().execute();
                 break;
             case HELP:
                 break;
