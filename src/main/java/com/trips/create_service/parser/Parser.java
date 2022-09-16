@@ -9,32 +9,33 @@ public class Parser {
             .addOption(getHydrateOption())
             .addOption(getHelpOption());
 
-    public static Tokens parse(String[] arguments) {
+    public static CommandWrapper parse(String[] arguments) {
         CommandLineParser parser = new DefaultParser();
         HelpFormatter helpFormatter = new HelpFormatter();
 
         try {
             CommandLine line = parser.parse(Parser.options, arguments);
             if(line.hasOption("generate")) {
-                return Tokens.GENERATE;
+                return new CommandWrapper(Tokens.GENERATE,line.getOptionValue("generate"));
             }
             if(line.hasOption("hydrate")) {
-                return Tokens.HYDRATE;
+                return new CommandWrapper(Tokens.HYDRATE,"");
             }
             if(line.hasOption("help")) {
                 helpFormatter.printHelp("sfc", Parser.options);
-                return Tokens.HELP;
+                return new CommandWrapper(Tokens.HELP,"");
             }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             helpFormatter.printHelp("sfc", Parser.options);
         }
 
-        return Tokens.HELP;
+        return new CommandWrapper(Tokens.HELP,"");
     }
 
     private static Option getGenerateOption() {
         return Option.builder("generate").desc("Used to generate a skeleton for service framework")
+                .hasArg()
                 .build();
     }
 

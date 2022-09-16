@@ -8,10 +8,11 @@ import com.trips.create_service.tasks.Hydrate;
 public class Application {
     public static void main(String[] args) {
 
-        Tokens t = Parser.parse(args);
+        Tokens t = Parser.parse(args).getToken();
         switch (t) {
             case GENERATE:
-                Generate.execute();
+                System.out.println(Parser.parse(args).getData());
+                Generate.builder().data(Parser.parse(args).getData()).build().execute();
                 break;
             case HYDRATE:
                 Hydrate.execute();
