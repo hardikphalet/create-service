@@ -1,18 +1,38 @@
 package com.trips.create_service.tasks;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Stream;
 
 public class Hydrate {
+
+    public final static Set<String> skipList = new HashSet<>(List.of("gradle", ".gradle", ".idea", "build", "test", "resources"));
+
     public static void execute() {
-        File folder = new File("./skeleton/src/main/java/com/cf/serve/entities");
-        File[] entityList = folder.listFiles();
-        if (!folder.isDirectory()) {
-            System.out.println("Entity package doesn't exist. Please re-run the -generate command.");
+        File folder = null;
+        try {
+            folder = findDirectory("entities");
+        } catch (IOException e) {
+            System.out.println("No package called entity found.");
             return;
         }
+        File[] entityList = folder.listFiles(new FileFilter() {
+            @Override
+            public boolean accept(File pathname) {
+                return pathname.isFile() && pathname.getName().endsWith("java");
+            }
+        });
 
-        if(entityList == null || entityList.length == 0) {
-            System.out.println("No entities.");
+        if (entityList == null || entityList.length == 0) {
+            System.out.println("No entity class found in the entities package.");
             return;
         }
 
@@ -26,4 +46,16 @@ public class Hydrate {
 
         System.out.println("hydrate command used.");
     }
+
+    private static File findDirectory(String directoryName) throws IOException {
+        try (Stream<Path> stream = Files.walk(Paths.get("./"))) {
+            return new File(stream
+                    .filter(Files::isDirectory)
+                    .filter(e -> e.getFileName().toString().equals(directoryName))
+                    .map(Path::toString)
+                    .findFirst().orElseThrow(IOException::new));
+        }
+    }
+
+
 }
