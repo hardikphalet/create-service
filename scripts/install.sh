@@ -74,6 +74,6 @@ cd ./create-service || exit
 execute "./gradlew" "assemble"
 echo "$PATH:$(pwd)"
 export PATH="$PATH:$(pwd)"
-echo export PATH="\$PATH:$(pwd)" >> ~/.zshrc
-echo export SFC_HOME="$(pwd)" >> ~/.zshrc
+echo export PATH="\"\$PATH:$(pwd)\"" >> ~/.zshrc
+echo export SFC_HOME="\"$(pwd)\"" >> ~/.zshrc
 cd ..
