@@ -74,4 +74,5 @@ cd ./create-service || exit
 execute "./gradlew" "assemble"
 echo "$PATH:$(pwd)"
 export PATH="$PATH:$(pwd)"
-#echo export PATH="\$PATH:$(pwd)/dev/flutter/bin" >> main.txt
+echo export PATH="\$PATH:$(pwd)" >> ~/.zshrc
+cd ..
