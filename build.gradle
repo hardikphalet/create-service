@@ -10,6 +10,10 @@ repositories {
 }
 dependencies {
 
+    implementation group: 'com.x5dev', name: 'chunk-templates', version: '3.3.1'
+    implementation 'org.freemarker:freemarker:2.3.31'
+
+
     compileOnly 'org.projectlombok:lombok:1.18.24'
     annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
