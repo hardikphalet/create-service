@@ -1,0 +1,3 @@
+./gradlew assemble
+export
+java -jar build/libs/create-service-1.0-SNAPSHOT-all.jar $1 $2
