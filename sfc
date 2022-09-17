@@ -1,1 +1,1 @@
-java -jar "${SFC_HOME}"build/libs/create-service-1.0-SNAPSHOT-all.jar $1 $2
+java -jar $SFC_HOME/build/libs/create-service-1.0-SNAPSHOT-all.jar $1 $2
