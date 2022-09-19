@@ -5,21 +5,17 @@ import freemarker.template.utility.StringUtil;
 import lombok.Builder;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
-import java.util.stream.Stream;
 
 @Builder
 public class Hydrate {
-
-    public final Set<String> skipList = new HashSet<>(List.of("gradle", ".gradle", ".idea", "build", "test", "resources"));
-
     public void execute() {
+
+
+        // Find entity classes
         File folder = null;
         try {
-            folder = findDirectory("entities");
+            folder = Utils.findDirectory("entities");
         } catch (IOException e) {
             System.out.println("No package called entity found.");
             return;
@@ -30,15 +26,15 @@ public class Hydrate {
                 return pathname.isFile() && pathname.getName().endsWith("java");
             }
         });
-
         if (entityList == null || entityList.length == 0) {
             System.out.println("No entity class found in the entities package.");
             return;
         }
-
         StringBuilder stringBuilder = new StringBuilder("Entites found are: ");
-        String packageName = null;
 
+        // Find the new Package Name for the project
+        // This is done to decouple generate and hydrate functionalities
+        String packageName = null;
         try {
             Scanner packageScanner = new Scanner(entityList[0]);
             while (packageScanner.hasNext()) {
@@ -59,16 +55,19 @@ public class Hydrate {
             finalPackage.append(".").append(packageTokens[i]);
         }
 
+        // Hydrating components for each Entity class
+        // Done because implementation of certain entites might be there already
         for (File entity : entityList) {
             stringBuilder.append(entity.getName().split("[.]")[0]);
             stringBuilder.append(" | ");
 
             try {
-                hydrateResponse(entity, finalPackage.toString());
-                hydrateMapper(entity, finalPackage.toString());
-                hydrateRepository(entity,finalPackage.toString());
-                hydrateService(entity,finalPackage.toString());
-                hydrateControllers(entity,finalPackage.toString());
+
+                hydrateComponent(entity, Component.Components.MAPPER, finalPackage.toString());
+                hydrateComponent(entity, Component.Components.REPOSITORY, finalPackage.toString());
+                hydrateComponent(entity, Component.Components.RESPONSE, finalPackage.toString());
+                hydrateComponent(entity, Component.Components.SERVICE, finalPackage.toString());
+                hydrateComponent(entity, Component.Components.CONTROLLERS, finalPackage.toString());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -76,143 +75,28 @@ public class Hydrate {
         }
 
         System.out.println(stringBuilder);
-
-        System.out.println("hydrate command used.");
     }
 
-    private void hydrateControllers(File entityFile, String s) throws IOException {
-        File newController = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator +  "controllers" + File.separator + entityFile.getName().replace(".","Controller."));
-        if (newController.exists()) {
+    private void hydrateComponent(File entityFile, Component.Components componentType, String packageName) throws IOException {
+        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + Component.getPackageName(componentType) + File.separator + entityFile.getName().replace(".",Component.getFileName(componentType)));
+        if (newFile.exists()) {
             return;
         }
-        newController.createNewFile();
-        Configuration cfg = new Configuration(new Version("2.3.31"));
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setClassForTemplateLoading(Hydrate.class, "/templates");
-        Map<String, Object> input = new HashMap<>();
-        input.put("entity_name", entityFile.getName().split("[.]")[0]);
-        input.put("package_name", s);
-        try {
-            Template template = cfg.getTemplate("RegionController.java");
-            FileWriter out = new FileWriter(newController);
-            template.process(input,out);
-            out.close();
-        } catch (IOException | TemplateException e) {
-            throw new RuntimeException(e);
+        if (newFile.createNewFile()) {
+            Configuration cfg = new Configuration(new Version("2.3.31"));
+            cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
+            cfg.setClassForTemplateLoading(Hydrate.class, "/templates");
+            Map<String, Object> input = new HashMap<>();
+            input.put("entity_name", entityFile.getName().split("[.]")[0]);
+            input.put("package_name", packageName);
+            try {
+                Template template = cfg.getTemplate("Region" + Component.getFileName(componentType) + "java");
+                FileWriter out = new FileWriter(newFile);
+                template.process(input,out);
+                out.close();
+            } catch (IOException | TemplateException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
-
-    private void hydrateMapper(File entityFile, String s) throws IOException {
-        File newMapper = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + "mappers" + File.separator + entityFile.getName().replace(".","Mapper."));
-        if (newMapper.exists()) {
-            return;
-        }
-        newMapper.createNewFile();
-        Configuration cfg = new Configuration(new Version("2.3.31"));
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setClassForTemplateLoading(Hydrate.class, "/templates");
-        Map<String, Object> input = new HashMap<>();
-        input.put("entity_name", entityFile.getName().split("[.]")[0]);
-        input.put("package_name", s);
-        try {
-            Template template = cfg.getTemplate("RegionMapper.java");
-            FileWriter out = new FileWriter(newMapper);
-            template.process(input,out);
-            out.close();
-        } catch (IOException | TemplateException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void hydrateResponse(File entityFile, String s) throws IOException {
-        File newResponse = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + "responses" + File.separator + entityFile.getName().replace(".","Response."));
-        if (newResponse.exists()) {
-            return;
-        }
-        newResponse.createNewFile();
-        Configuration cfg = new Configuration(new Version("2.3.31"));
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setClassForTemplateLoading(Hydrate.class, "/templates");
-        Map<String, Object> input = new HashMap<>();
-        input.put("entity_name", entityFile.getName().split("[.]")[0]);
-        input.put("package_name", s);
-        try {
-            Template template = cfg.getTemplate("RegionResponse.java");
-            FileWriter out = new FileWriter(newResponse);
-            template.process(input,out);
-            out.close();
-        } catch (IOException | TemplateException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void hydrateRepository(File entityFile, String s) throws IOException {
-        File newRepository = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator +  "repositories" + File.separator + entityFile.getName().replace(".","Repository."));
-        if (newRepository.exists()) {
-            return;
-        }
-        newRepository.createNewFile();
-        Configuration cfg = new Configuration(new Version("2.3.31"));
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setClassForTemplateLoading(Hydrate.class, "/templates");
-        Map<String, Object> input = new HashMap<>();
-        input.put("entity_name", entityFile.getName().split("[.]")[0]);
-        input.put("package_name", s);
-        try {
-            Template template = cfg.getTemplate("RegionRepository.java");
-            FileWriter out = new FileWriter(newRepository);
-            template.process(input,out);
-            out.close();
-        } catch (IOException | TemplateException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    private void hydrateService(File entityFile, String s) throws IOException {
-        File newService = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator +  "services" + File.separator + entityFile.getName().replace(".","Service."));
-        if (newService.exists()) {
-            return;
-        }
-        newService.createNewFile();
-        Configuration cfg = new Configuration(new Version("2.3.31"));
-        cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
-        cfg.setClassForTemplateLoading(Hydrate.class, "/templates");
-        Map<String, Object> input = new HashMap<>();
-        input.put("entity_name", entityFile.getName().split("[.]")[0]);
-        input.put("package_name", s);
-        try {
-            Template template = cfg.getTemplate("RegionService.java");
-            FileWriter out = new FileWriter(newService);
-            template.process(input,out);
-            out.close();
-        } catch (IOException | TemplateException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-
-    // TODO add to util class
-    public static File findDirectory(String directoryName) throws IOException {
-        try (Stream<Path> stream = Files.walk(Paths.get("./"))) {
-            return new File(stream
-                    .filter(Files::isDirectory)
-                    .filter(e -> e.getFileName().toString().equals(directoryName))
-                    .filter(e -> !e.toString().contains("test"))
-                    .map(Path::toString)
-                    .findFirst().orElseThrow(IOException::new));
-        }
-    }
-
-    public static File findDirectory(String directoryName, String filterDirectory) throws IOException {
-        try (Stream<Path> stream = Files.walk(Paths.get("./"))) {
-            return new File(stream
-                    .filter(Files::isDirectory)
-                    .filter(e -> e.getFileName().toString().equals(directoryName))
-                    .filter(e -> !e.toString().contains(filterDirectory))
-                    .map(Path::toString)
-                    .findFirst().orElseThrow(IOException::new));
-        }
-    }
-
-
 }
