@@ -26,7 +26,7 @@ public class Parser {
                 return new CommandWrapper(Tokens.HELP,"");
             }
             else {
-                System.out.println(arguments + " is not a valid input.");
+                System.out.println(arguments[0] + " is not a valid input.");
                 helpFormatter.printHelp("sfc", Parser.options);
             }
         } catch (ParseException e) {
