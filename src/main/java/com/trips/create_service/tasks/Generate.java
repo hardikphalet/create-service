@@ -50,7 +50,7 @@ public class Generate {
     }
 
     private void renameClasses() {
-        for (File javaFiles : getAllJavaFiles()) {
+        for (File javaFiles : getAllFilesOfType("java","./skeleton")) {
             File newJavaFile = new File(javaFiles.getPath().replace("Region", "Demo"));
             javaFiles.renameTo(newJavaFile);
         }
@@ -63,7 +63,7 @@ public class Generate {
         cfg.setClassForTemplateLoading(Generate.class, "/templates");
         Map<String, Object> input = new HashMap<>();
         input.put("group_name", data.split("[.]")[0] + "." + data.split("[.]")[1]);
-        for (File javaFile : getAllGradleFiles()) {
+        for (File javaFile : getAllFilesOfType("gradle","./skeleton")) {
             try {
                 Template template = cfg.getTemplate(javaFile.getName());
                 FileWriter out = new FileWriter(javaFile);
@@ -84,7 +84,7 @@ public class Generate {
         Map<String, Object> input = new HashMap<>();
         input.put("package_name", data);
         input.put("entity_name", "Demo");
-        for (File javaFile : getAllJavaFiles()) {
+        for (File javaFile : getAllFilesOfType("java", "./skeleton")) {
             try {
                 Template template = cfg.getTemplate(javaFile.getName());
                 FileWriter out = new FileWriter(javaFile);
@@ -97,30 +97,18 @@ public class Generate {
 
     }
 
-    private List<File> getAllJavaFiles() {
-        try (Stream<Path> stream = Files.walk(Paths.get("./skeleton"))) {
-            return  stream
-                    .filter(Files::isRegularFile)
-                    .filter(e -> e.getFileName().toString().endsWith(".java"))
-                    .map(e -> new File(e.toString()))
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    private List<File> getAllGradleFiles() {
-        try (Stream<Path> stream = Files.walk(Paths.get("./skeleton"))) {
-            return  stream
-                    .filter(Files::isRegularFile)
-                    .filter(e -> e.getFileName().toString().endsWith(".gradle"))
-//                    .peek(e -> System.out.println(e.toString()))
-                    .map(e -> new File(e.toString()))
-                    .collect(Collectors.toList());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
+    private List<File> getAllFilesOfType(String fileExtension, String baseDirectory) {
+        try (Stream<Path> stream = Files.walk(Paths.get(baseDirectory))) {
+            return  stream
+                    .filter(Files::isRegularFile)
+                    .filter(e -> e.getFileName().toString().endsWith("." + fileExtension))
+                    .map(e -> new File(e.toString()))
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Some error occurred trying to read files of type " + fileExtension);
+        }
+    }
 
     public void renamePackage() {
 
@@ -128,9 +116,9 @@ public class Generate {
         boolean successFlag = true;
         for (int i = 0; i < skeletonDefaultPackage.length; i++) {
             try {
-                String newFilePath = Hydrate.findDirectory(skeletonDefaultPackage[i], "test").getParent() + File.separator + packageTokenised[i];
+                String newFilePath = Utils.findDirectory(skeletonDefaultPackage[i], "test").getParent() + File.separator + packageTokenised[i];
                 File newFile = new File(newFilePath);
-                File oldFile = Hydrate.findDirectory(skeletonDefaultPackage[i], "test");
+                File oldFile = Utils.findDirectory(skeletonDefaultPackage[i], "test");
                 oldFile.renameTo(newFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
@@ -141,15 +129,12 @@ public class Generate {
     public void renameTestPackage() {
 
         String[] packageTokenised = data.split("[.]");
-        for (String token :
-                packageTokenised) {
-        }
         boolean successFlag = true;
         for (int i = 0; i < skeletonDefaultPackage.length; i++) {
             try {
-                String newFilePath = Hydrate.findDirectory(skeletonDefaultPackage[i], "main").getParent() + File.separator + packageTokenised[i];
+                String newFilePath = Utils.findDirectory(skeletonDefaultPackage[i], "main").getParent() + File.separator + packageTokenised[i];
                 File newFile = new File(newFilePath);
-                File oldFile = Hydrate.findDirectory(skeletonDefaultPackage[i], "main");
+                File oldFile = Utils.findDirectory(skeletonDefaultPackage[i], "main");
                 oldFile.renameTo(newFile);
             } catch (IOException e) {
                 throw new RuntimeException(e);
