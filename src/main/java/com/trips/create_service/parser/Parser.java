@@ -25,11 +25,14 @@ public class Parser {
                 helpFormatter.printHelp("sfc", Parser.options);
                 return new CommandWrapper(Tokens.HELP,"");
             }
+            else {
+                System.out.println(arguments[0] + " is not a valid input.");
+                helpFormatter.printHelp("sfc", Parser.options);
+            }
         } catch (ParseException e) {
             System.out.println(e.getMessage());
             helpFormatter.printHelp("sfc", Parser.options);
         }
-
         return new CommandWrapper(Tokens.HELP,"");
     }
 
