@@ -5,8 +5,6 @@ import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import org.trips.service_framework.models.responses.BaseResponse;
 
-import java.util.List;
-
 @Data
 @SuperBuilder
 public class ${entity_name}Response extends BaseResponse {

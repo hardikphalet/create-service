@@ -17,7 +17,6 @@ To create skeleton, run after installation:
 ```shell
 sfc -generate package.name.here
 cd ./skeleton
-# Package must be triple layered
 ```
 
 Create your entities in the entity package. To Hydrate project with classes, run:

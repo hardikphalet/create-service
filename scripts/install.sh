@@ -69,11 +69,27 @@ execute() {
   fi
 }
 
+SHELL_BASH="bash"
+SHELL_ZSH="zsh"
+
+SHELL_ZSH_CONFIG_PATH="$HOME/.zshrc"
+SHELL_BASH_CONFIG_PATH="$HOME/.bashrc"
+
 execute "git" "clone" "${SFC_DEFAULT_GIT_REMOTE}"
 cd ./create-service || exit
 execute "./gradlew" "assemble"
 echo "$PATH:$(pwd)"
 export PATH="$PATH:$(pwd)"
-echo export PATH="\"\$PATH:$(pwd)\"" >> ~/.zshrc
-echo export SFC_HOME="\"$(pwd)\"" >> ~/.zshrc
+
+commit_to_shell() {
+  if [[ $SHELL == *"$SHELL_ZSH"* ]]; then
+    echo export PATH="\"\$PATH:$(pwd)\"" >> ~/.zshrc
+    echo export SFC_HOME="\"$(pwd)\"" >> ~/.zshrc
+  elif [[ $SHELL == *"$SHELL_BASH"* ]]; then
+    echo export PATH="\"\$PATH:$(pwd)\"" >> ~/.bashrc
+  fi
+}
+
+commit_to_shell
+
 cd ..
