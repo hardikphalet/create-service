@@ -13,24 +13,19 @@ public class Hydrate {
 
 
         // Find entity classes
-        File folder = null;
+        File folder;
         try {
             folder = Utils.findDirectory("entities");
         } catch (IOException e) {
             System.out.println("No package called entity found.");
             return;
         }
-        File[] entityList = folder.listFiles(new FileFilter() {
-            @Override
-            public boolean accept(File pathname) {
-                return pathname.isFile() && pathname.getName().endsWith("java");
-            }
-        });
+        File[] entityList = folder.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith("java"));
         if (entityList == null || entityList.length == 0) {
             System.out.println("No entity class found in the entities package.");
             return;
         }
-        StringBuilder stringBuilder = new StringBuilder("Entites found are: ");
+        StringBuilder stringBuilder = new StringBuilder("Entities found are: ");
 
         // Find the new Package Name for the project
         // This is done to decouple generate and hydrate functionalities
@@ -49,25 +44,25 @@ public class Hydrate {
             throw new RuntimeException(e);
         }
         StringBuilder finalPackage = new StringBuilder();
-        String[] packageTokens = packageName.split("[.]");
+        String[] packageTokens = Objects.requireNonNull(packageName).split("[.]");
         finalPackage.append(packageTokens[0]).append(".");
         for (int i = 1; i < 3; i++) {
             finalPackage.append(".").append(packageTokens[i]);
         }
 
         // Hydrating components for each Entity class
-        // Done because implementation of certain entites might be there already
+        // Done because implementation of certain entities might be there already
         for (File entity : entityList) {
             stringBuilder.append(entity.getName().split("[.]")[0]);
             stringBuilder.append(" | ");
 
             try {
 
-                hydrateComponent(entity, Component.Components.MAPPER, finalPackage.toString());
-                hydrateComponent(entity, Component.Components.REPOSITORY, finalPackage.toString());
-                hydrateComponent(entity, Component.Components.RESPONSE, finalPackage.toString());
-                hydrateComponent(entity, Component.Components.SERVICE, finalPackage.toString());
-                hydrateComponent(entity, Component.Components.CONTROLLERS, finalPackage.toString());
+                hydrateComponent(entity, Component.MAPPER, finalPackage.toString());
+                hydrateComponent(entity, Component.REPOSITORY, finalPackage.toString());
+                hydrateComponent(entity, Component.RESPONSE, finalPackage.toString());
+                hydrateComponent(entity, Component.SERVICE, finalPackage.toString());
+                hydrateComponent(entity, Component.CONTROLLER, finalPackage.toString());
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -77,8 +72,8 @@ public class Hydrate {
         System.out.println(stringBuilder);
     }
 
-    private void hydrateComponent(File entityFile, Component.Components componentType, String packageName) throws IOException {
-        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + Component.getPackageName(componentType) + File.separator + entityFile.getName().replace(".",Component.getFileName(componentType)));
+    private void hydrateComponent(File entityFile, Component componentType, String packageName) throws IOException {
+        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + componentType.getPackageName() + File.separator + entityFile.getName().replace(".",componentType.getFileName()));
         if (newFile.exists()) {
             return;
         }
@@ -90,7 +85,7 @@ public class Hydrate {
             input.put("entity_name", entityFile.getName().split("[.]")[0]);
             input.put("package_name", packageName);
             try {
-                Template template = cfg.getTemplate("Region" + Component.getFileName(componentType) + "java");
+                Template template = cfg.getTemplate("Region" + componentType.getFileName() + "java");
                 FileWriter out = new FileWriter(newFile);
                 template.process(input,out);
                 out.close();

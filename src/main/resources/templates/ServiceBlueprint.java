@@ -1,12 +1,10 @@
 package ${package_name}.services;
 
 import ${package_name}.entities.Region;
-import ${package_name}.mappers.RegionMapper;
-import ${package_name}.repositories.RegionRepository;
+{package_name}.mappers.RegionMapper;
+{package_name}.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
 import org.trips.service_framework.services.BaseService;
-
-import java.util.List;
 
 @Service
 public class ${entity_name}Service extends BaseService<Region> {

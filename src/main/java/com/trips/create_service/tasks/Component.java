@@ -1,41 +1,20 @@
 package com.trips.create_service.tasks;
 
-public class Component {
-    public enum Components {
-        CONTROLLERS,
-        MAPPER,
-        REPOSITORY,
-        RESPONSE,
-        SERVICE,
-    }
+import lombok.Getter;
 
-    public static String getPackageName(Components componentType) {
-        switch (componentType) {
-            case MAPPER:
-                return "mappers";
-            case REPOSITORY:
-                return "repositories";
-            case CONTROLLERS:
-                return "controllers";
-            case RESPONSE:
-                return "responses";
-            default:
-                return "services";
-        }
-    }
+public enum Component {
+    SERVICE("Service.","services"),
+    CONTROLLER("Controller.", "controllers"),
+    MAPPER("Mapper.", "mappers"),
+    RESPONSE("Response.", "responses"),
+    REPOSITORY("Repository.","repositories");
 
-    public static String getFileName(Components componentType) {
-        switch (componentType) {
-            case MAPPER:
-                return "Mapper.";
-            case REPOSITORY:
-                return "Repository.";
-            case CONTROLLERS:
-                return "Controller.";
-            case RESPONSE:
-                return "Response.";
-            default:
-                return "Service.";
-        }
+    @Getter
+    private final String fileName;
+    @Getter
+    private final String packageName;
+    Component(String fileName, String packageName) {
+        this.fileName = fileName;
+        this.packageName = packageName;
     }
 }
