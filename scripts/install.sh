@@ -70,7 +70,7 @@ execute() {
 }
 
 SHELL_BASH="bash"
-SHELL_ZSH ="zsh"
+SHELL_ZSH="zsh"
 
 SHELL_ZSH_CONFIG_PATH="$HOME/.zshrc"
 SHELL_BASH_CONFIG_PATH="$HOME/.bashrc"
