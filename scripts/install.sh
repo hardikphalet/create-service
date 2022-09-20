@@ -87,7 +87,6 @@ commit_to_shell() {
     echo export SFC_HOME="\"$(pwd)\"" >> ~/.zshrc
   elif [[ $SHELL == *"$SHELL_BASH"* ]]; then
     echo export PATH="\"\$PATH:$(pwd)\"" >> ~/.bashrc
-    echo export SFC_HOME="\"$(pwd)\"" >> ~/.bashrc
   fi
 }
 
