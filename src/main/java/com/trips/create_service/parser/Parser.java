@@ -9,7 +9,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 public class Parser {
-    private static final HashSet<Tokens> tokenSet = (HashSet<Tokens>) Arrays.stream(new Tokens[]{Tokens.HELP, Tokens.HYDRATE, Tokens.DEV, Tokens.GENERATE}).collect(Collectors.toSet());
+    private static final HashSet<Tokens> tokenSet = (HashSet<Tokens>) Arrays.stream(new Tokens[]{Tokens.HELP, Tokens.HYDRATE, Tokens.GENERATE}).collect(Collectors.toSet());
 
     public static CommandWrapper parse(String[] arguments) {
         String providedTokenArgument = arguments[0];

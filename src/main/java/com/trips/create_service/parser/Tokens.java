@@ -6,9 +6,7 @@ public enum Tokens {
 
     GENERATE(true),
     HELP(false),
-    HYDRATE(false),
-    DEV(false); // TODO to remove before release,
-
+    HYDRATE(false);
     @Getter
     private final boolean dataRequired;
 

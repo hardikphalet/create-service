@@ -19,7 +19,7 @@ public class SourceScanner {
     public List<File> getEntityList() throws IOException {
         return Files.walk(Paths.get(sourcePath))
                 .filter(Files::isRegularFile)
-                .filter(x -> x.getFileName().endsWith(".java"))
+                .filter(x -> x.toString().endsWith(".java"))
                 .map(Path::toFile)
                 .filter(this::isEntity)
                 .collect(Collectors.toList());

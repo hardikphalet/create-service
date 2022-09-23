@@ -4,7 +4,10 @@ import com.trips.create_service.scanners.SourceScanner;
 import freemarker.template.*;
 import lombok.Builder;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
 
@@ -18,7 +21,8 @@ public class Hydrate {
         try {
             entityList = new ArrayList<>(scanner.getEntityList());
         } catch (IOException e) {
-            throw new RuntimeException(e); // TODO Handle Exception
+            System.out.println("Entity List has no elements. Access error.");
+            return;
         }
 
         if (entityList.size() == 0) {
@@ -68,7 +72,7 @@ public class Hydrate {
     }
 
     private void hydrateComponent(File entityFile, Component componentType, String packageName) throws IOException {
-        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + componentType.getPackageName() + File.separator + entityFile.getName().replace(".",componentType.getFileName() + "."));
+        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + componentType.getPackageName() + File.separator + entityFile.getName().replace(".", componentType.getFileName() + "."));
         if (newFile.exists()) {
             return;
         }
@@ -82,7 +86,7 @@ public class Hydrate {
             try {
                 Template template = cfg.getTemplate(componentType.getFileName() + "Blueprint.java");
                 FileWriter out = new FileWriter(newFile);
-                template.process(input,out);
+                template.process(input, out);
                 out.close();
             } catch (IOException | TemplateException e) {
                 throw new RuntimeException(e);
