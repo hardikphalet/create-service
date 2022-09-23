@@ -36,7 +36,6 @@ public class Generate {
 
         String baseSourcePath = cloneDirectoryName + File.separator + "src" + File.separator + "main" + File.separator + "java";
         System.out.println(baseSourcePath);
-        File baseSource = new File(baseSourcePath);
         try {
             File packageDirectory = new File(baseSourcePath);
             for (String packageToken: packageTokens) {
@@ -46,7 +45,7 @@ public class Generate {
             cfg.setTemplateExceptionHandler(TemplateExceptionHandler.RETHROW_HANDLER);
             cfg.setClassForTemplateLoading(Generate.class, "/templates");
             for (Component component: Component.values()) {
-                File newComponentFile = new File(packageDirectory.getPath() + File.separator + component.getPackageName() + File.separator + "Demo" + component.getFileName() + "java");
+                File newComponentFile = new File(packageDirectory.getPath() + File.separator + component.getPackageName() + File.separator + "Demo" + component.getFileName() + ".java");
                 System.out.println(component.getFileName());
                 System.out.println(newComponentFile.getPath());
                 newComponentFile.getParentFile().mkdirs();
@@ -55,19 +54,13 @@ public class Generate {
                 input.put("entity_name", "Demo");
                 input.put("package_name", data);
 
-                Template template = cfg.getTemplate(component.getFileName().replace(".", "") + "Blueprint.java");
+                Template template = cfg.getTemplate(component.getFileName() + "Blueprint.java");
                 FileWriter out = new FileWriter(newComponentFile);
                 template.process(input,out);
                 out.close();
                 System.out.println(newComponentFile.getPath() + " created successfully");
 
             }
-            Map<String, String> inputForGradleTemplate = new HashMap<>();
-            inputForGradleTemplate.put("group_name", "");
-            Template templateForGradleFile = cfg.getTemplate("build.gradle");
-            FileWriter gradleOut = new FileWriter(packageDirectory + File.separator + "build.gradle");
-            templateForGradleFile.process(inputForGradleTemplate, gradleOut);
-            gradleOut.close();
         } catch (IOException | TemplateException e) {
             e.printStackTrace();
         }

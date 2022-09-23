@@ -1,56 +1,39 @@
 package com.trips.create_service.parser;
 
-import org.apache.commons.cli.*;
+import com.trips.create_service.exceptions.InvalidTokenException;
+import lombok.extern.slf4j.Slf4j;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.stream.Collectors;
+
+@Slf4j
 public class Parser {
-
-    public static final Options options = new Options()
-            .addOption(getGenerateOption())
-            .addOption(getHydrateOption())
-            .addOption(getHelpOption());
+    private static final HashSet<Tokens> tokenSet = (HashSet<Tokens>) Arrays.stream(new Tokens[]{Tokens.HELP, Tokens.HYDRATE, Tokens.DEV, Tokens.GENERATE}).collect(Collectors.toSet());
 
     public static CommandWrapper parse(String[] arguments) {
-        CommandLineParser parser = new DefaultParser();
-        HelpFormatter helpFormatter = new HelpFormatter();
+        String providedTokenArgument = arguments[0];
+
+        Tokens providedToken = null;
 
         try {
-            CommandLine line = parser.parse(Parser.options, arguments);
-            if(line.hasOption("generate")) {
-                return new CommandWrapper(Tokens.GENERATE,line.getOptionValue("generate"));
-            }
-            if(line.hasOption("hydrate")) {
-                return new CommandWrapper(Tokens.HYDRATE,"");
-            }
-            if(line.hasOption("help")) {
-                helpFormatter.printHelp("sfc", Parser.options);
-                return new CommandWrapper(Tokens.HELP,"");
-            }
-            else {
-                System.out.println(arguments[0] + " is not a valid input.");
-                helpFormatter.printHelp("sfc", Parser.options);
-            }
-        } catch (ParseException e) {
-            System.out.println(e.getMessage());
-            helpFormatter.printHelp("sfc", Parser.options);
+            providedToken = getTokenFromArgument(providedTokenArgument);
+        } catch (InvalidTokenException e) {
+            log.debug(e.getMessage());
+            providedToken = Tokens.HELP;
         }
-        return new CommandWrapper(Tokens.HELP,"");
+        if (providedToken.isDataRequired()) {
+            return CommandWrapper.builder().token(providedToken).data(arguments[1]).build();
+        }
+
+        return CommandWrapper.builder().token(providedToken).build();
     }
 
-    private static Option getGenerateOption() {
-        return Option.builder("generate").desc("Used to generate a skeleton for service framework")
-                .hasArg()
-                .build();
-    }
-
-    private static Option getHydrateOption() {
-        return Option.builder("hydrate").desc("Used to hydrate the skeleton project with required " +
-                        "classes on the basis of classes present in entities package")
-                .build();
-    }
-
-    private static Option getHelpOption() {
-        return Option.builder("help").desc("Documentation")
-                .build();
+    private static Tokens getTokenFromArgument(String arg) {
+        if (tokenSet.stream().map(Enum::toString).collect(Collectors.toSet()).contains(arg.toUpperCase())) {
+            return Enum.valueOf(Tokens.class, arg.toUpperCase());
+        }
+        throw new InvalidTokenException(String.format("%s is not a valid input.", arg));
     }
 
 }

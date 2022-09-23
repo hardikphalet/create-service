@@ -80,7 +80,7 @@ cd ./create-service || exit
 execute "./gradlew" "assemble"
 echo "$PATH:$(pwd)"
 export PATH="$PATH:$(pwd)"
-
+chmod +x ./build/libs/create-service-1.0-SNAPSHOT-all.java
 commit_to_shell() {
   if [[ $SHELL == *"$SHELL_ZSH"* ]]; then
     echo export PATH="\"\$PATH:$(pwd)\"" >> ~/.zshrc

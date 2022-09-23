@@ -1,10 +1,11 @@
 package com.trips.create_service.tasks;
 
+import com.trips.create_service.scanners.SourceScanner;
 import freemarker.template.*;
-import freemarker.template.utility.StringUtil;
 import lombok.Builder;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.util.*;
 
 @Builder
@@ -12,16 +13,15 @@ public class Hydrate {
     public void execute() {
 
 
-        // Find entity classes
-        File folder;
+        SourceScanner scanner = new SourceScanner("./");
+        List<File> entityList;
         try {
-            folder = Utils.findDirectory("entities");
+            entityList = new ArrayList<>(scanner.getEntityList());
         } catch (IOException e) {
-            System.out.println("No package called entity found.");
-            return;
+            throw new RuntimeException(e); // TODO Handle Exception
         }
-        File[] entityList = folder.listFiles(pathname -> pathname.isFile() && pathname.getName().endsWith("java"));
-        if (entityList == null || entityList.length == 0) {
+
+        if (entityList.size() == 0) {
             System.out.println("No entity class found in the entities package.");
             return;
         }
@@ -31,16 +31,12 @@ public class Hydrate {
         // This is done to decouple generate and hydrate functionalities
         String packageName = null;
         try {
-            Scanner packageScanner = new Scanner(entityList[0]);
-            while (packageScanner.hasNext()) {
-                String line = packageScanner.nextLine();
-                if (line != null && line.contains("package")) {
-                    System.out.println(line);
-                    packageName = StringUtil.split(line, ' ')[1].trim();
-                    break;
-                }
-            }
-        } catch (FileNotFoundException e) {
+            packageName = Files.lines(entityList.get(0).toPath())
+                    .filter(x -> x.contains("package"))
+                    .map(x -> x.split("[ ;]")[1])
+                    .findFirst()
+                    .orElseThrow(() -> new FileNotFoundException(String.format("Cannot find package of the Entity.")));
+        } catch (IOException e) {
             throw new RuntimeException(e);
         }
         StringBuilder finalPackage = new StringBuilder();
@@ -57,7 +53,6 @@ public class Hydrate {
             stringBuilder.append(" | ");
 
             try {
-
                 hydrateComponent(entity, Component.MAPPER, finalPackage.toString());
                 hydrateComponent(entity, Component.REPOSITORY, finalPackage.toString());
                 hydrateComponent(entity, Component.RESPONSE, finalPackage.toString());
@@ -73,7 +68,7 @@ public class Hydrate {
     }
 
     private void hydrateComponent(File entityFile, Component componentType, String packageName) throws IOException {
-        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + componentType.getPackageName() + File.separator + entityFile.getName().replace(".",componentType.getFileName()));
+        File newFile = new File(entityFile.getParentFile().getParentFile().getPath() + File.separator + componentType.getPackageName() + File.separator + entityFile.getName().replace(".",componentType.getFileName() + "."));
         if (newFile.exists()) {
             return;
         }
@@ -85,7 +80,7 @@ public class Hydrate {
             input.put("entity_name", entityFile.getName().split("[.]")[0]);
             input.put("package_name", packageName);
             try {
-                Template template = cfg.getTemplate("Region" + componentType.getFileName() + "java");
+                Template template = cfg.getTemplate(componentType.getFileName() + "Blueprint.java");
                 FileWriter out = new FileWriter(newFile);
                 template.process(input,out);
                 out.close();
