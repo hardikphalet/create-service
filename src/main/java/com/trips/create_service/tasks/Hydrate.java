@@ -35,7 +35,7 @@ public class Hydrate {
                     .filter(x -> x.contains("package"))
                     .map(x -> x.split("[ ;]")[1])
                     .findFirst()
-                    .orElseThrow(() -> new FileNotFoundException(String.format("Cannot find package of the Entity.")));
+                    .orElseThrow(() -> new FileNotFoundException("Cannot find package of the Entity."));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

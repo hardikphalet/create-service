@@ -7,6 +7,7 @@ public enum Component {
     CONTROLLER("Controller", "controllers"),
     MAPPER("Mapper", "mappers"),
     RESPONSE("Response", "responses"),
+    ENTITY("Entity", "entites"),
     REPOSITORY("Repository", "repositories");
 
     @Getter
