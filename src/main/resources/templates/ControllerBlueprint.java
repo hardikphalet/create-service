@@ -1,9 +1,9 @@
 package ${package_name}.controllers;
 
 import ${package_name}.entities.${entity_name};
-{package_name}.responses.${entity_name}NameResponse;
-{package_name}.responses.${entity_name}Response;
-{package_name}.services.${entity_name}Service;
+${package_name}.responses.${entity_name}NameResponse;
+${package_name}.responses.${entity_name}Response;
+${package_name}.services.${entity_name}Service;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
