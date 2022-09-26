@@ -45,7 +45,7 @@ public class Hydrate {
         }
         StringBuilder finalPackage = new StringBuilder();
         String[] packageTokens = Objects.requireNonNull(packageName).split("[.]");
-        finalPackage.append(packageTokens[0]).append(".");
+        finalPackage.append(packageTokens[0]);
         for (int i = 1; i < 3; i++) {
             finalPackage.append(".").append(packageTokens[i]);
         }
