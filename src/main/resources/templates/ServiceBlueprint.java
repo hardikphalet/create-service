@@ -1,8 +1,8 @@
 package ${package_name}.services;
 
 import ${package_name}.entities.Region;
-{package_name}.mappers.RegionMapper;
-{package_name}.repositories.RegionRepository;
+${package_name}.mappers.RegionMapper;
+${package_name}.repositories.RegionRepository;
 import org.springframework.stereotype.Service;
 import org.trips.service_framework.services.BaseService;
 
